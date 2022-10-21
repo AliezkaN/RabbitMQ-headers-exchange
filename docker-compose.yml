@@ -1,0 +1,63 @@
+services:
+  publisher:
+    container_name: publisher
+    build:
+      /publisher/
+    ports:
+      - "8080:8080"
+    environment:
+      - spring_rabbitmq_host=rabbitmq
+      - spring_rabbitmq_port=5672
+      - spring_rabbitmq_username=guest
+      - spring_rabbitmq_password=guest
+    depends_on:
+      - rabbitmq-container
+    networks:
+      - rabbitmq-network
+  first-consumer:
+    container_name: first-consumer
+    build:
+      /first-consumer/
+    ports:
+        - "8081:8081"
+    environment:
+      - spring_rabbitmq_host=rabbitmq
+      - spring_rabbitmq_port=5672
+      - spring_rabbitmq_username=guest
+      - spring_rabbitmq_password=guest
+    depends_on:
+      - rabbitmq-container
+    networks:
+      - rabbitmq-network
+  second-consumer:
+    container_name: second-consumer
+    build:
+      /second-consumer/
+    ports:
+        - "8082:8082"
+    environment:
+      - spring_rabbitmq_host=rabbitmq
+      - spring_rabbitmq_port=5672
+      - spring_rabbitmq_username=guest
+      - spring_rabbitmq_password=guest
+    depends_on:
+      - rabbitmq-container
+    networks:
+      - rabbitmq-network
+
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    hostname: rabbitmq-container
+    container_name: 'rabbitmq'
+    ports:
+      - 5672:5672
+      - 15672:15672
+    volumes:
+      - ~/.docker-conf/rabbitmq/data/:/var/lib/rabbitmq/
+      - ~/.docker-conf/rabbitmq/log/:/var/log/rabbitmq
+    networks:
+      - rabbitmq-network
+
+networks:
+  rabbitmq-network:
+    driver: bridge
